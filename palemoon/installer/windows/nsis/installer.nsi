@@ -1074,6 +1074,15 @@ Function .onInit
     ExecShell "open" "${URLSystemRequirements}"
     Quit
   ${EndUnless}
+  ; Don't install on systems that don't support AVX. The parameter value of
+  ; 39 is for PF_AVX_INSTRUCTIONS_AVAILABLE which will check whether the
+  ; AVX instruction set is available. Result returned in $R7.
+  System::Call "kernel32::IsProcessorFeaturePresent(i 39)i .R7"
+  ${If} "$R7" == "0"
+    MessageBox MB_OKCANCEL|MB_ICONSTOP "$(WARN_MIN_SUPPORTED_CPU64_MSG)" IDCANCEL +2
+    ExecShell "open" "${URLSystemRequirements}"
+    Quit
+  ${EndIf}  
   SetRegView 64
 !endif
 
