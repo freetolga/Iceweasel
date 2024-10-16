@@ -47,6 +47,7 @@ MOZ_PHOENIX=1
 MOZ_PERSONAS=1
 
 # Which SIMD set the installer should check for on 64-bit.
+# Default set in configure script, can be overridden here.
 # INSTALLER_ARCH="AVX"
 
 # Browser Feature: Profile Migration Component

@@ -58,7 +58,10 @@ dnl MOZ_ARG_WITH_STRING(installer-check,
 dnl [  --with-installer-check=args   For which CPU instruction set the installer should check.],
 dnl     INSTALLER_ARCH=$withval,
 dnl     INSTALLER_ARCH="AVX")
-dnl INSTALLER_ARCH="AVX"
+
+if test -z "$INSTALLER_ARCH"; then
+    INSTALLER_ARCH="AVX"
+fi
 
 if test "$INSTALLER_ARCH" = "SSE2"; then
     INSTALLER_ARCH_SSE2=1
