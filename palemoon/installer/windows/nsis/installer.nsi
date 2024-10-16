@@ -1074,10 +1074,21 @@ Function .onInit
     ExecShell "open" "${URLSystemRequirements}"
     Quit
   ${EndUnless}
-  ; Don't install on systems that don't support AVX. The parameter value of
-  ; 39 is for PF_AVX_INSTRUCTIONS_AVAILABLE which will check whether the
-  ; AVX instruction set is available. Result returned in $R7.
+
+  ; Don't install on systems that don't support the specified instruction set.
+  ; The parameter value of 39 is for PF_AVX_INSTRUCTIONS_AVAILABLE and
+  ; 40 is for PF_AVX2_INSTRUCTIONS_AVAILABLE which will check whether the
+  ; instruction set is available. Result returned in $R7.
+  ; SSE2 is already checked above as absolute minimum for all architectures.
+!if "${InstallerArch}" == "AVX"
   System::Call "kernel32::IsProcessorFeaturePresent(i 39)i .R7"
+!else
+  !if "${InstallerArch}" == "AVX2"
+    System::Call "kernel32::IsProcessorFeaturePresent(i 40)i .R7"
+  !else
+    ; Use previous value of $R7 from the SSE2 check above.
+  !endif
+!endif
   ${If} "$R7" == "0"
     MessageBox MB_OKCANCEL|MB_ICONSTOP "$(WARN_MIN_SUPPORTED_CPU64_MSG)" IDCANCEL +2
     ExecShell "open" "${URLSystemRequirements}"

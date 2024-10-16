@@ -46,6 +46,9 @@ MOZ_PHOENIX=1
 # Lightweight Themes
 MOZ_PERSONAS=1
 
+# Which SIMD set the installer should check for on 64-bit.
+# INSTALLER_ARCH="AVX"
+
 # Browser Feature: Profile Migration Component
 MOZ_PROFILE_MIGRATOR=
 
