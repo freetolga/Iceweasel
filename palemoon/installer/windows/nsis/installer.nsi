@@ -1079,16 +1079,20 @@ Function .onInit
   ; The parameter value of 39 is for PF_AVX_INSTRUCTIONS_AVAILABLE and
   ; 40 is for PF_AVX2_INSTRUCTIONS_AVAILABLE which will check whether the
   ; instruction set is available. Result returned in $R7.
+  ; This is only available on Windows 10 or later. There's no way to check
+  ; this on kernel versions < 10.0.2004 through the Windows API.
   ; SSE2 is already checked above as absolute minimum for all architectures.
-!if "${InstallerArch}" == "AVX"
-  System::Call "kernel32::IsProcessorFeaturePresent(i 39)i .R7"
-!else
-  !if "${InstallerArch}" == "AVX2"
-    System::Call "kernel32::IsProcessorFeaturePresent(i 40)i .R7"
-  !else
-    ; Use previous value of $R7 from the SSE2 check above.
-  !endif
-!endif
+  ${If} ${AtLeastWin10}
+    ${If} "${InstallerArch}" == "AVX"
+      System::Call "kernel32::IsProcessorFeaturePresent(i 39)i .R7"
+    ${Else}
+      ${If} "${InstallerArch}" == "AVX2"
+        System::Call "kernel32::IsProcessorFeaturePresent(i 40)i .R7"
+      ${Else}
+        ; Use previous value of $R7 from the SSE2 check above.
+      ${EndIf}
+    ${EndIf}
+  ${EndIf}
   ${If} "$R7" == "0"
     MessageBox MB_OKCANCEL|MB_ICONSTOP "$(WARN_MIN_SUPPORTED_CPU64_MSG)" IDCANCEL +2
     ExecShell "open" "${URLSystemRequirements}"
