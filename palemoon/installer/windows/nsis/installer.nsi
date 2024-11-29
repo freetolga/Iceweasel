@@ -1075,6 +1075,7 @@ Function .onInit
     Quit
   ${EndUnless}
 
+  SetRegView 64
   ; Don't install on systems that don't support the specified instruction set.
   ; The parameter value of 39 is for PF_AVX_INSTRUCTIONS_AVAILABLE and
   ; 40 is for PF_AVX2_INSTRUCTIONS_AVAILABLE which will check whether the
@@ -1083,13 +1084,30 @@ Function .onInit
   ; this on kernel versions < 10.0.2004 through the Windows API.
   ; SSE2 is already checked above as absolute minimum for all architectures.
   ${If} ${AtLeastWin10}
-    ${If} "${InstallerArch}" == "AVX"
-      System::Call "kernel32::IsProcessorFeaturePresent(i 39)i .R7"
-    ${Else}
-      ${If} "${InstallerArch}" == "AVX2"
-        System::Call "kernel32::IsProcessorFeaturePresent(i 40)i .R7"
+    ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "ReleaseId"
+!ifdef DEBUG
+    {$If} $0 == ""
+      StrCpy $0 "undefined"
+    {$EndIf}
+    MessageBox MB_OK|MB_ICONINFORMATION "Debug: O.S. ReleaseId = $0"
+!endif
+    ${If} $0 != "1507"
+    ${AndIf} $0 != "1511"
+    ${AndIf} $0 != "1607"
+    ${AndIf} $0 != "1703"
+    ${AndIf} $0 != "1709"
+    ${AndIf} $0 != "1803"
+    ${AndIf} $0 != "1809"
+    ${AndIf} $0 != "1903"
+    ${AndIf} $0 != "1909"
+      ${If} "${InstallerArch}" == "AVX"
+        System::Call "kernel32::IsProcessorFeaturePresent(i 39)i .R7"
       ${Else}
-        ; Use previous value of $R7 from the SSE2 check above.
+        ${If} "${InstallerArch}" == "AVX2"
+          System::Call "kernel32::IsProcessorFeaturePresent(i 40)i .R7"
+        ${Else}
+          ; Use previous value of $R7 from the SSE2 check above.
+        ${EndIf}
       ${EndIf}
     ${EndIf}
   ${EndIf}
@@ -1098,7 +1116,6 @@ Function .onInit
     ExecShell "open" "${URLSystemRequirements}"
     Quit
   ${EndIf}  
-  SetRegView 64
 !endif
 
   ${InstallOnInitCommon} "$(WARN_MIN_SUPPORTED_OSVER_CPU_MSG)"
